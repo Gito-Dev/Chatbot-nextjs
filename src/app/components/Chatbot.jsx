@@ -1,11 +1,11 @@
 "use client"
 import React, { useState } from "react";
 import axios from "axios";
-import { ChatButton } from "./chat/ChatButton";
-import { ChatHeader } from "./chat/ChatHeader";
-import { MessageList } from "./chat/MessageList";
-import { MessageInput } from "./chat/MessageInput";
-import { CartModal } from "./chat/CartModal";
+import { ChatButton } from "./Chat/ChatButton";
+import { ChatHeader } from "./Chat/ChatHeader";
+import { MessageList } from "./Chat/MessageList";
+import { MessageInput } from "./Chat/MessageInput";
+import { CartModal } from "./Chat/CartModal";
 
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);

@@ -33,7 +33,7 @@ export const MessageInput = ({ input, setInput, onSend }) => {
         )}
       </div>
       <p className="text-center text-xs mt-2">
-        Made by <a href="https://www.highsky.ai/" className="text-blue-500">HighSky AI</a>
+        Powered by <a href="https://www.highsky.ai/" className="text-blue-500">HighSky AI</a>
       </p>
     </div>
   );
