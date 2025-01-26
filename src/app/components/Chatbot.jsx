@@ -12,10 +12,12 @@ export default function Chatbot() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [sessionId] = useState(`session-${Date.now()}`);
   const [cartState, setCartState] = useState({
     showCart: false,
     action: ''
   });
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   const toggleChat = () => setIsOpen(!isOpen);
 
@@ -27,19 +29,40 @@ export default function Chatbot() {
     setInput("");
     setIsTyping(true);
     
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Format chat history
+    const chatHistory = messages.map(msg => ({
+      content: msg.text,
+      type: msg.sender === "user" ? "human" : "ai"
+    }));
+
+    console.log('Sending chat history:', chatHistory); // Debug log
 
     try {
-      const response = await axios.post("YOUR_API_ENDPOINT", {
-        message: input,
-      });
+      const response = await axios.post(
+        "/api/chat",
+        {
+          message: input,
+          session_id: sessionId,
+          chat_history: chatHistory
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          withCredentials: true
+        }
+      );
 
+      console.log('API Response:', response.data); // Debug log
+
+      const botMessage = response.data.agent_response?.messages?.[1]?.content || response.data;
       setIsTyping(false);
-      setMessages((prev) => [...prev, { text: response.data.reply, sender: "bot" }]);
+      setMessages((prev) => [...prev, { text: botMessage, sender: "bot" }]);
     } catch (error) {
       console.error("Error:", error);
       setIsTyping(false);
-      setMessages((prev) => [...prev, { text: "Failed to fetch reply", sender: "bot" }]);
+      setMessages((prev) => [...prev, { text: "Sorry, I encountered an error. Please try again.", sender: "bot" }]);
     }
   };
 
@@ -69,6 +92,17 @@ export default function Chatbot() {
     }
   };
 
+  const handleEndConversation = () => {
+    setMessages([]); // Clear all messages
+    setInput(""); // Clear input
+    setShowConfirmDialog(false);
+    setIsOpen(false);
+  };
+
+  const handleCancelClose = () => {
+    setShowConfirmDialog(false);
+  };
+
   return (
     <div className="fixed bottom-14 left-7 z-50">
       {!isOpen ? (
@@ -89,7 +123,7 @@ export default function Chatbot() {
         >
           <ChatHeader 
             onMinimize={() => setIsOpen(false)}
-            onClose={() => setIsOpen(false)}
+            onClose={() => setShowConfirmDialog(true)}
             onCartClick={cartActions.openCart}
           />
           <MessageList 
@@ -100,6 +134,9 @@ export default function Chatbot() {
             input={input}
             setInput={setInput}
             onSend={handleSend}
+            showConfirmDialog={showConfirmDialog}
+            onEndConversation={handleEndConversation}
+            onCancelClose={handleCancelClose}
           />
         </div>
       )}
@@ -113,4 +150,5 @@ export default function Chatbot() {
     </div>
   );
 }
+
 
