@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 export async function POST(req) {
   try {
     const body = await req.json();
-    console.log('Received request body:', body); // Debug log
+    console.log('Received request body:', body); 
 
     const sessionId = body.session_id || crypto.randomUUID();
     const requestBody = {
