@@ -5,7 +5,6 @@ import { ChatButton } from "./Chat/ChatButton";
 import { ChatHeader } from "./Chat/ChatHeader";
 import { MessageList } from "./Chat/MessageList";
 import { MessageInput } from "./Chat/MessageInput";
-import { CartModal } from "./Chat/CartModal";
 
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,10 +12,6 @@ export default function Chatbot() {
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [sessionId] = useState(`session-${Date.now()}`);
-  const [cartState, setCartState] = useState({
-    showCart: false,
-    action: ''
-  });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   const toggleChat = () => setIsOpen(!isOpen);
@@ -66,32 +61,6 @@ export default function Chatbot() {
     }
   };
 
-  const cartActions = {
-    openCart: () => setCartState({
-      showCart: true,
-      action: ''
-    }),
-    
-    closeCart: () => setCartState({
-      showCart: false,
-      action: ''
-    }),
-    
-    checkout: () => {
-      setCartState({
-        showCart: false,
-        action: 'checkout'
-      });
-    },
-    
-    clearCart: () => {
-      setCartState({
-        showCart: false,
-        action: 'clear'
-      });
-    }
-  };
-
   const handleEndConversation = () => {
     setMessages([]); // Clear all messages
     setInput(""); // Clear input
@@ -124,7 +93,6 @@ export default function Chatbot() {
           <ChatHeader 
             onMinimize={() => setIsOpen(false)}
             onClose={() => setShowConfirmDialog(true)}
-            onCartClick={cartActions.openCart}
           />
           <MessageList 
             messages={messages}
@@ -139,13 +107,6 @@ export default function Chatbot() {
             onCancelClose={handleCancelClose}
           />
         </div>
-      )}
-      
-      {cartState.showCart && (
-        <CartModal 
-          cartState={cartState}
-          cartActions={cartActions}
-        />
       )}
     </div>
   );
