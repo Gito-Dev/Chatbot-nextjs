@@ -24,21 +24,12 @@ export default function Chatbot() {
     setInput("");
     setIsTyping(true);
     
-    // Format chat history
-    const chatHistory = messages.map(msg => ({
-      content: msg.text,
-      type: msg.sender === "user" ? "human" : "ai"
-    }));
-
-    console.log('Sending chat history:', chatHistory); // Debug log
-
     try {
       const response = await axios.post(
         "/api/chat",
         {
           message: input,
-          session_id: sessionId,
-          chat_history: chatHistory
+          session_id: sessionId
         },
         {
           headers: {
@@ -51,9 +42,12 @@ export default function Chatbot() {
 
       console.log('API Response:', response.data); // Debug log
 
-      const botMessage = response.data.agent_response?.messages?.[1]?.content || response.data;
+      // Get the latest message from agent_response.messages
+      const messagesArray = response.data.agent_response?.messages || [];
+      const latestMessage = messagesArray[messagesArray.length - 1]?.content || "No response from agent";
+
       setIsTyping(false);
-      setMessages((prev) => [...prev, { text: botMessage, sender: "bot" }]);
+      setMessages((prev) => [...prev, { text: latestMessage, sender: "bot" }]);
     } catch (error) {
       console.error("Error:", error);
       setIsTyping(false);
