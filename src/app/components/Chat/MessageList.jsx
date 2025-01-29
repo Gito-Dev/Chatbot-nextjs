@@ -33,7 +33,7 @@ export const MessageList = ({ messages, isTyping }) => {
             key={index}
             className={`mb-2 ${msg.sender === "user" ? "text-right flex justify-end" : "text-left"}`}
           >
-            <div className={`flex items-start gap-2 max-w-[60%] ${
+            <div className={`flex items-start gap-2 max-w-[50%] ${
               msg.sender === "user" ? "flex-row-reverse" : "flex-row"
             }`}>
               {msg.sender === "bot" && (
