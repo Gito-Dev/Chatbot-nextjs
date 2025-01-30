@@ -5,6 +5,7 @@ import { ChatButton } from "./Chat/ChatButton";
 import { ChatHeader } from "./Chat/ChatHeader";
 import { MessageList } from "./Chat/MessageList";
 import { MessageInput } from "./Chat/MessageInput";
+import { motion } from "framer-motion";
 
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -55,15 +56,12 @@ export default function Chatbot() {
     }
   };
 
-  const handleEndConversation = () => {
-    setMessages([]); // Clear all messages
-    setInput(""); // Clear input
-    setShowConfirmDialog(false);
-    setIsOpen(false);
-  };
-
-  const handleCancelClose = () => {
-    setShowConfirmDialog(false);
+  const handleClose = () => {
+    if (messages.length > 0) {
+      setShowConfirmDialog(true);
+    } else {
+      setIsOpen(false);
+    }
   };
 
   return (
@@ -71,11 +69,15 @@ export default function Chatbot() {
       {!isOpen ? (
         <ChatButton onClick={toggleChat} />
       ) : (
-        <div className={`${
-          window.innerWidth < 768 
-            ? "w-full fixed inset-0 bg-white" 
-            : "w-96 h-[600px] fixed bottom-5 left-5 rounded-2xl"
-          } z-50 flex flex-col overflow-hidden shadow-lg`}
+        <motion.div
+          initial={{ y: "100%" }}
+          animate={{ y: isOpen ? "0%" : "100%" }}
+          transition={{ duration: 0.3 }}
+          className={`${
+            window.innerWidth < 768 
+              ? "w-full fixed inset-0 bg-white" 
+              : "w-96 h-[600px] fixed bottom-5 left-5 rounded-2xl"
+            } z-50 flex flex-col overflow-hidden shadow-lg`}
           style={{
             ...(window.innerWidth < 768 ? {
               paddingTop: 'env(safe-area-inset-top)',
@@ -86,7 +88,7 @@ export default function Chatbot() {
         >
           <ChatHeader 
             onMinimize={() => setIsOpen(false)}
-            onClose={() => setShowConfirmDialog(true)}
+            onClose={handleClose}
           />
           <MessageList 
             messages={messages}
@@ -97,13 +99,16 @@ export default function Chatbot() {
             setInput={setInput}
             onSend={handleSend}
             showConfirmDialog={showConfirmDialog}
-            onEndConversation={handleEndConversation}
-            onCancelClose={handleCancelClose}
+            onEndConversation={() => {
+              setMessages([]);
+              setInput("");
+              setShowConfirmDialog(false);
+              setIsOpen(false);
+            }}
+            onCancelClose={() => setShowConfirmDialog(false)}
           />
-        </div>
+        </motion.div>
       )}
     </div>
   );
 }
-
-
