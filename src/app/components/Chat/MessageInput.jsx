@@ -1,6 +1,6 @@
-export const MessageInput = ({ input, setInput, onSend, showConfirmDialog, onEndConversation, onCancelClose }) => {
+export const MessageInput = ({ input, setInput, onSend, showConfirmDialog, onEndConversation, onCancelClose, disabled }) => {
   const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !showConfirmDialog) {
+    if (e.key === "Enter" && !showConfirmDialog && !disabled) {
       onSend();
     }
   };
@@ -12,13 +12,16 @@ export const MessageInput = ({ input, setInput, onSend, showConfirmDialog, onEnd
           <div className="relative mb-2">
             <input
               type="text"
-              className="w-full p-3 border rounded-lg outline-none focus:outline-none pr-12 border-gray-400 placeholder:text-gray-600"
-              placeholder="Message..."
+              className={`w-full p-3 border rounded-lg outline-none focus:outline-none pr-12 border-gray-400 placeholder:text-gray-600 ${
+                disabled ? 'bg-gray-100 cursor-not-allowed' : ''
+              }`}
+              placeholder={disabled ? "Please wait for response..." : "Message..."}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
+              disabled={disabled}
             />
-            {input && (
+            {input && !disabled && (
               <span
                 className="absolute top-1/2 right-3 transform -translate-y-1/2 text-white bg-blue-500 rounded-full w-8 h-8 flex items-center justify-center cursor-pointer hover:bg-blue-600 hover:scale-105 transition-all duration-200"
                 onClick={onSend}

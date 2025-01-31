@@ -72,7 +72,7 @@ export default function Chatbot() {
         <motion.div
           initial={{ y: "100%" }}
           animate={{ y: isOpen ? "0%" : "100%" }}
-          transition={{ duration: 0.3 }}
+          transition={{ duration: 0.2 }}
           className={`${
             window.innerWidth < 768 
               ? "w-full fixed inset-0 bg-white" 
@@ -106,6 +106,7 @@ export default function Chatbot() {
               setIsOpen(false);
             }}
             onCancelClose={() => setShowConfirmDialog(false)}
+            disabled={isTyping}
           />
         </motion.div>
       )}
