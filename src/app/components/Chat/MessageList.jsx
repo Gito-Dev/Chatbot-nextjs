@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from "react";
 import Image from "next/image";
 import logo from "../../assets/logo.png";
+import { TypeAnimation } from 'react-type-animation';
 
 export const MessageList = ({ messages, isTyping }) => {
   const messagesEndRef = useRef(null);
@@ -50,12 +51,21 @@ export const MessageList = ({ messages, isTyping }) => {
                   ? "bg-blue-500 text-white text-sm font-light rounded-md rounded-tr-sm"
                   : "bg-gray-300 rounded-md text-sm font-light rounded-tl-sm"
               }`}>
-                {msg.text.split('\n').map((line, i) => (
-                  <React.Fragment key={i}>
-                    {line}
-                    {i !== msg.text.split('\n').length - 1 && <br />}
-                  </React.Fragment>
-                ))}
+                {msg.sender === "bot" ? (
+                  <TypeAnimation
+                    sequence={[msg.text]}
+                    wrapper="span"
+                    speed={75}
+                    cursor={false}
+                  />
+                ) : (
+                  msg.text.split('\n').map((line, i) => (
+                    <React.Fragment key={i}>
+                      {line}
+                      {i !== msg.text.split('\n').length - 1 && <br />}
+                    </React.Fragment>
+                  ))
+                )}
               </span>
             </div>
           </div>
