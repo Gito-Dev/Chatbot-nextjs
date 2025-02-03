@@ -76,7 +76,7 @@ export default function Chatbot() {
           className={`${
             window.innerWidth < 768 
               ? "w-full fixed inset-0 bg-white" 
-              : "w-96 h-[600px] fixed bottom-5 left-5 rounded-2xl"
+              : "w-96 h-[650px] fixed bottom-5 left-5 rounded-2xl"
             } z-50 flex flex-col overflow-hidden shadow-lg`}
           style={{
             ...(window.innerWidth < 768 ? {
