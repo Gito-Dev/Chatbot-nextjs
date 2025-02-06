@@ -34,29 +34,18 @@ export async function POST(req) {
     const messages = data.agent_response?.messages || [];
     const lastMessage = messages[messages.length - 1]?.content || '';
 
-    // Transform the API response to include product information
+    // Transform the API response to include only essential product information
     const responseData = {
-      message: lastMessage, // Use the last message from the conversation
+      message: lastMessage,
       messages: messages.map(msg => ({
         content: msg.content,
         role: msg.role || 'assistant'
       })),
       displayChoice: data.agent_response?.product_information?.display_choice === 'yes',
       hasOneProduct: data.has_one_product === 'yes',
-      hasTwoProducts: data.has_two_products === 'yes',
-      hasThreeProducts: data.has_three_products === 'yes',
-      product1Title: data.product1Title || '',
-      product1Image1: data.product1Image1 || '',
-      product1Price: data.product1Price || '',
-      product1Url: data.product1Url || '',
-      product2Title: data.product2Title || '',
-      product2Image1: data.product2Image1 || '',
-      product2Price: data.product2Price || '',
-      product2Url: data.product2Url || '',
-      product3Title: data.product3Title || '',
-      product3Image1: data.product3Image1 || '',
-      product3Price: data.product3Price || '',
-      product3Url: data.product3Url || '',
+      title: data.product1Title || '',
+      price: data.product1Price || '',
+      img_url: data.product1Image1 || '',
     };
 
     console.log('Response data:', responseData);
