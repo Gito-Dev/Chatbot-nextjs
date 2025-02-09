@@ -43,13 +43,14 @@ export const MessageList = memo(({ messages, isTyping }) => {
                 {msg.hasOneProduct && (
                   <div className="mt-4 bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
                     {msg.product1Image1 && (
-                      <div className="relative w-full h-48 mb-3">
+                      <div className="relative w-full aspect-video mb-3">
                         <Image 
                           src={msg.product1Image1} 
                           alt={msg.product1Title || 'Product Image'} 
-                          layout="fill"
-                          objectFit="cover"
-                          className="rounded-md"
+                          fill
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                          className="rounded-md object-cover"
+                          priority
                         />
                       </div>
                     )}

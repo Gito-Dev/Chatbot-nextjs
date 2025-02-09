@@ -49,25 +49,39 @@ export async function POST(req) {
     const messageContent = messages[messages.length - 1]?.content || 
                          'No response received';
 
-    // Extract product information
+    // Extract product information from API response
     const productInfo = data.agent_response?.product_information;
     
     // Prepare the response data
     const responseData = {
       message: messageContent,
-      displayChoice: true,
-      hasOneProduct: true, // Set to true if we have product info
+      displayChoice: false,
+      hasOneProduct: false,
       hasTwoProducts: false,
       hasThreeProducts: false,
-      // Product details
-      product1Title: "Adjustable Bodyflex Dumbbell 15kg",
-      product1Description: "Includes multiple weight plates (2x1kg, 2x1.25kg, 4x2.5kg)\nAnti-slip rubber grip\nVinyl-coated plates\nAdjustable weight system",
-      product1Image1: data.product_1_image_1 || "https://sportensklad.bg/image/catalog/FITNES_UREDI/tejesti-lostove-stoiki/dumbeli/profesionalen-gumiran-dymbel-spartan-profi-12-5.jpg",
-      product1Price: "89.99 лв",
-      product1Url: data.product_1_url || "https://sportensklad.bg/bodyflex-dumbbell-15kg"
+      // Product details - using exact property names from API response
+      product1Title: data.product_1_title || '',
+      product1Description: data.product_1_description || '',
+      product1Image1: data.product_1_image_1 || '',
+      product1Price: data.product_1_price || '',
+      product1Url: data.product_1_url || ''
     };
 
-    console.log('Sending response data:', responseData);
+    // Set display flags if we have product data
+    if (data.product_1_title && data.product_1_image_1) {
+      responseData.displayChoice = true;
+      responseData.hasOneProduct = true;
+    }
+
+    // Debug logs
+    console.log('Product data from API:', {
+      title: data.product_1_title,
+      image: data.product_1_image_1,
+      price: data.product_1_price,
+      url: data.product_1_url
+    });
+    
+    console.log('Final response data:', responseData);
 
     return NextResponse.json(responseData);
 
@@ -80,12 +94,11 @@ export async function POST(req) {
         error: true,
         details: error.message
       },
-      { status: 200 } // Return 200 to handle the error gracefully on the client
+      { status: 200 } 
     );
   }
 }
 
-// Handle OPTIONS request for CORS preflight
 export async function OPTIONS() {
   return NextResponse.json(
     {},
