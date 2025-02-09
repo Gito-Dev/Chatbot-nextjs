@@ -32,47 +32,50 @@ export default function Chatbot() {
   const toggleChat = () => setIsOpen(!isOpen);
 
   const handleSend = async () => {
-    if (!input) return;
+    if (!input.trim()) return;
 
-    const userMessage = { text: input, sender: "user" };
+    const userMessage = { text: input.trim(), sender: "user" };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsTyping(true);
-    
-    // Create new AbortController for this request
-    abortControllerRef.current = new AbortController();
     
     try {
       const response = await axios.post(
         "/api/chat",
         {
-          message: input,
-          session_id: sessionId
+          message: input.trim(),
+          session_id: sessionId,
+          chat_history: messages.map(msg => ({
+            content: msg.text || msg.content,
+            role: msg.sender === 'user' ? 'user' : 'assistant'
+          }))
         },
         {
           headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          withCredentials: true,
-          signal: abortControllerRef.current.signal
+          }
         }
       );
 
-      // Only process response if request wasn't aborted
-      if (!abortControllerRef.current.signal.aborted) {
-        console.log('API Response:', response.data);
-
+      if (response.data) {
         const botMessage = {
           sender: "bot",
           content: response.data.message,
           isNew: true,
-          ...response.data
+          displayChoice: response.data.displayChoice,
+          hasOneProduct: response.data.hasOneProduct,
+          hasTwoProducts: response.data.hasTwoProducts,
+          hasThreeProducts: response.data.hasThreeProducts,
+          product1Title: response.data.product1Title,
+          product1Image1: response.data.product1Image1,
+          product1Price: response.data.product1Price,
+          product1Url: response.data.product1Url
         };
 
         setIsTyping(false);
-        setMessages((prev) => [...prev, botMessage]);
+        setMessages(prev => [...prev, botMessage]);
 
+        // Remove isNew flag after animation
         setTimeout(() => {
           setMessages(prev => 
             prev.map(msg => 
@@ -83,19 +86,13 @@ export default function Chatbot() {
       }
 
     } catch (error) {
-      // Only show error if request wasn't aborted
-      if (!axios.isCancel(error)) {
-        console.error("Error:", error);
-        setIsTyping(false);
-        setMessages((prev) => [
-          ...prev,
-          { 
-            text: "Sorry, I encountered an error. Please try again.",
-            sender: "bot",
-            isNew: false
-          }
-        ]);
-      }
+      console.error("API Error Details:", error);
+      setIsTyping(false);
+      setMessages(prev => [...prev, {
+        text: "I apologize, but I encountered an error. Please try again.",
+        sender: "bot",
+        isNew: false
+      }]);
     }
   };
 

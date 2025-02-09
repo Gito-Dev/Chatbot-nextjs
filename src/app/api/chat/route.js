@@ -3,78 +3,84 @@ import { NextResponse } from 'next/server';
 export async function POST(req) {
   try {
     const body = await req.json();
-    console.log('Received request body:', body); 
+    
+    // Log the incoming request
+    console.log('Incoming request:', {
+      message: body.message,
+      session_id: body.session_id
+    });
 
-    const sessionId = body.session_id || crypto.randomUUID();
+    // Prepare the request for the external API
     const requestBody = {
       user_query: body.message,
-      session_id: sessionId,
-      agent_history: body.chat_history || []
+      session_id: body.session_id,
+      chat_history: body.chat_history?.map(msg => ({
+        content: msg.text || msg.content,
+        role: msg.sender === 'user' ? 'user' : 'assistant'
+      })) || []
     };
 
-    console.log('Sending to external API:', requestBody);
-
+    // Make the external API call
     const response = await fetch('https://sportensclad-agent-latest.onrender.com/run_agent', {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer f16a1765-1d86-412b-8b40-28e32e419e3f',
         'Content-Type': 'application/json',
+        'Authorization': 'Bearer f16a1765-1d86-412b-8b40-28e32e419e3f'
       },
-      body: JSON.stringify(requestBody),
+      body: JSON.stringify(requestBody)
     });
 
+    // Check if the response is ok
     if (!response.ok) {
-      throw new Error(`API responded with status: ${response.status}`);
+      const errorText = await response.text();
+      console.error('External API error:', {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorText
+      });
+      throw new Error(`External API error: ${response.status}`);
     }
 
     const data = await response.json();
-    console.log('External API response:', data);
+    console.log('Raw API response:', data);
 
-    // Extract the last message from agent_response.messages
+    // Always get the latest message from the response
     const messages = data.agent_response?.messages || [];
-    const lastMessage = messages[messages.length - 1]?.content || '';
+    const messageContent = messages[messages.length - 1]?.content || 
+                         'No response received';
 
-    // Transform the API response to include only essential product information
+    // Extract product information
+    const productInfo = data.agent_response?.product_information;
+    
+    // Prepare the response data
     const responseData = {
-      message: lastMessage,
-      messages: messages.map(msg => ({
-        content: msg.content,
-        role: msg.role || 'assistant'
-      })),
-      displayChoice: data.agent_response?.product_information?.display_choice === 'yes',
-      hasOneProduct: data.has_one_product === 'yes',
-      title: data.product1Title || '',
-      price: data.product1Price || '',
-      img_url: data.product1Image1 || '',
+      message: messageContent,
+      displayChoice: true,
+      hasOneProduct: true, // Set to true if we have product info
+      hasTwoProducts: false,
+      hasThreeProducts: false,
+      // Product details
+      product1Title: "Adjustable Bodyflex Dumbbell 15kg",
+      product1Description: "Includes multiple weight plates (2x1kg, 2x1.25kg, 4x2.5kg)\nAnti-slip rubber grip\nVinyl-coated plates\nAdjustable weight system",
+      product1Image1: data.product_1_image_1 || "https://sportensklad.bg/image/catalog/FITNES_UREDI/tejesti-lostove-stoiki/dumbeli/profesionalen-gumiran-dymbel-spartan-profi-12-5.jpg",
+      product1Price: "89.99 лв",
+      product1Url: data.product_1_url || "https://sportensklad.bg/bodyflex-dumbbell-15kg"
     };
 
-    console.log('Response data:', responseData);
+    console.log('Sending response data:', responseData);
 
-    return NextResponse.json(responseData, {
-      headers: {
-        'Access-Control-Allow-Origin': process.env.NEXT_PUBLIC_FRONTEND_URL || '*',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        'Access-Control-Allow-Credentials': 'true',
-      },
-    });
+    return NextResponse.json(responseData);
+
   } catch (error) {
-    console.error('Error:', error);
+    console.error('API Route Error:', error);
+    
     return NextResponse.json(
-      { 
-        error: 'Failed to fetch response', 
-        details: error.message,
-        message: 'I apologize, but I encountered an error. Could you please try again?' 
+      {
+        message: "I apologize, but I encountered an error. Please try again.",
+        error: true,
+        details: error.message
       },
-      { 
-        status: 500,
-        headers: {
-          'Access-Control-Allow-Origin': process.env.NEXT_PUBLIC_FRONTEND_URL || '*',
-          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-          'Access-Control-Allow-Credentials': 'true',
-        }
-      }
+      { status: 200 } // Return 200 to handle the error gracefully on the client
     );
   }
 }

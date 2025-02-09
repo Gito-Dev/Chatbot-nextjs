@@ -16,53 +16,82 @@ export const MessageList = memo(({ messages, isTyping }) => {
 
   useEffect(() => {
     if (autoScroll && messagesEndRef.current) {
-      setTimeout(() => {
-        messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-      }, 100);
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages, isTyping, autoScroll]);
 
-  // Improved debugging: only log messages in development mode
-  useEffect(() => {
-    if (process.env.NODE_ENV === "development") {
-      console.log("Updated Messages:", messages);
-    }
-  }, [messages]);
-
   const renderMessage = useCallback((msg, index) => {
     return (
-      <div key={index} className={`mb-2 ${msg.sender === "user" ? "text-right flex justify-end" : "text-left"}`}>
+      <div key={`${index}-${msg.content || msg.text}`} className={`mb-2 ${msg.sender === "user" ? "text-right flex justify-end" : "text-left"}`}>
         <div className={`flex items-start gap-2 ${msg.sender === "user" ? "flex-row-reverse max-w-[70%]" : "flex-row max-w-[80%]"}`}>
           {msg.sender === "bot" && (
             <Image src={logo} alt="Bot" className="w-8 h-8 rounded-full object-cover mt-1 flex-shrink-0" width={32} height={32} />
           )}
-          <span className={`inline-block p-3 whitespace-pre-wrap break-words text-left ${
+          <div className={`inline-block p-3 whitespace-pre-wrap break-words text-left ${
             msg.sender === "user"
               ? "bg-blue-500 text-white text-sm font-light rounded-md"
               : "bg-gray-100 rounded-md text-sm font-light"
           }`}>
             {msg.sender === "bot" ? (
-              msg.isNew ? (
-                <TypeAnimation sequence={[msg.content || msg.text || ""]} wrapper="span" speed={75} cursor={false} />
-              ) : (
-                <span>{msg.content || msg.text || ""}</span>
-              )
+              <>
+                {msg.isNew ? (
+                  <TypeAnimation sequence={[msg.content || msg.text || ""]} wrapper="span" speed={75} cursor={false} />
+                ) : (
+                  <span>{msg.content || msg.text || ""}</span>
+                )}
+                
+                {msg.hasOneProduct && (
+                  <div className="mt-4 bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                    {msg.product1Image1 && (
+                      <div className="relative w-full h-48 mb-3">
+                        <Image 
+                          src={msg.product1Image1} 
+                          alt={msg.product1Title || 'Product Image'} 
+                          layout="fill"
+                          objectFit="cover"
+                          className="rounded-md"
+                        />
+                      </div>
+                    )}
+                    <div className="space-y-2">
+                      {msg.product1Title && (
+                        <h3 className="font-medium text-gray-800">{msg.product1Title}</h3>
+                      )}
+                      {msg.product1Description && (
+                        <p className="text-sm text-gray-600">{msg.product1Description}</p>
+                      )}
+                      {msg.product1Price && (
+                        <p className="text-lg font-semibold text-blue-600">{msg.product1Price}</p>
+                      )}
+                      {msg.product1Url && (
+                        <a 
+                          href={msg.product1Url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-block bg-blue-500 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-600 transition-colors"
+                        >
+                          View Product
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </>
             ) : (
-              (msg.content || msg.text || "").split("\n").map((line, i) => (
-                <React.Fragment key={i}>
-                  {line}
-                  {i !== (msg.content || msg.text || "").split("\n").length - 1 && <br />}
-                </React.Fragment>
-              ))
+              <span>{msg.content || msg.text || ""}</span>
             )}
-          </span>
+          </div>
         </div>
       </div>
     );
   }, []);
 
   return (
-    <div ref={containerRef} className="h-full overflow-y-auto p-4 bg-white flex flex-col" onScroll={handleScroll}>
+    <div 
+      ref={containerRef} 
+      className="h-full overflow-y-auto p-4 bg-white flex flex-col" 
+      onScroll={handleScroll}
+    >
       <div className="flex-shrink-0 flex flex-col items-center mb-8">
         <Image src={logo} alt="Chat Logo" className="w-20 h-20 rounded-full object-cover" width={80} height={80} />
         <div className="text-center space-y-2">
