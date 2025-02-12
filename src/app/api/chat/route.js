@@ -59,7 +59,6 @@ export async function POST(req) {
       hasOneProduct: !!data.product_1_title,
       hasTwoProducts: !!data.product_2_title,
       hasThreeProducts: !!data.product_3_title,
-      // Product details - using exact property names from API response
       product1Title: data.product_1_title || '',
       product1Image1: data.product_1_image_1 || '',
       product1Price: data.product_1_price || '',

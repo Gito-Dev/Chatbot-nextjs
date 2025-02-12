@@ -2,12 +2,13 @@ import React, { useRef, useEffect, useState, useCallback, memo } from "react";
 import Image from "next/image";
 import logo from "../../assets/logo.png";
 import { TypeAnimation } from "react-type-animation";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 export const MessageList = memo(({ messages, isTyping }) => {
   const messagesEndRef = useRef(null);
   const containerRef = useRef(null);
   const [autoScroll, setAutoScroll] = useState(true);
+  const [productIndices, setProductIndices] = useState({});
 
   const handleScroll = useCallback((e) => {
     const element = e.target;
@@ -21,74 +22,155 @@ export const MessageList = memo(({ messages, isTyping }) => {
     }
   }, [messages, isTyping, autoScroll]);
 
-  const renderProductCarousel = (msg) => {
-    // Create an array of all possible products
-    const productKeys = [
-      { title: 'product1Title', image: 'product1Image1', price: 'product1Price', url: 'product1Url' },
-      { title: 'product2Title', image: 'product2Image1', price: 'product2Price', url: 'product2Url' },
-      { title: 'product3Title', image: 'product3Image1', price: 'product3Price', url: 'product3Url' }
-    ];
+  const renderProductCarousel = (msg, messageIndex) => {
+    const products = [];
 
-    // Filter and map only the products that exist in the message
-    const products = productKeys
-      .map(keys => ({
-        title: msg[keys.title],
-        image: msg[keys.image],
-        price: msg[keys.price],
-        url: msg[keys.url]
-      }))
-      .filter(product => product.title); // Only include products that have a title
+    if (msg.product1Title) {
+      products.push({
+        title: msg.product1Title,
+        image: msg.product1Image1,
+        price: msg.product1Price,
+        url: msg.product1Url,
+      });
+    }
+    if (msg.product2Title) {
+      products.push({
+        title: msg.product2Title,
+        image: msg.product2Image1,
+        price: msg.product2Price,
+        url: msg.product2Url,
+      });
+    }
+    if (msg.product3Title) {
+      products.push({
+        title: msg.product3Title,
+        image: msg.product3Image1,
+        price: msg.product3Price,
+        url: msg.product3Url,
+      });
+    }
 
     if (products.length === 0) return null;
 
+    const currentIndex = productIndices[messageIndex] || 0;
+
+    const nextProduct = () => {
+      console.log('Next clicked, current index:', currentIndex); // Debug log
+      setProductIndices(prev => {
+        const newIndex = (currentIndex + 1) % products.length;
+        console.log('Setting new index:', newIndex); // Debug log
+        return {
+          ...prev,
+          [messageIndex]: newIndex
+        };
+      });
+    };
+
+    const previousProduct = () => {
+      console.log('Previous clicked, current index:', currentIndex); // Debug log
+      setProductIndices(prev => {
+        const newIndex = currentIndex === 0 ? products.length - 1 : currentIndex - 1;
+        console.log('Setting new index:', newIndex); // Debug log
+        return {
+          ...prev,
+          [messageIndex]: newIndex
+        };
+      });
+    };
+
     return (
-      <motion.div
-        className="flex overflow-x-auto space-x-4 mt-4"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-      >
-        {products.map((product, index) => (
-          <motion.div
-            key={index}
-            className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm min-w-[250px]"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
-          >
-            {product.image && (
-              <div className="relative w-full aspect-video mb-3">
-                <Image
-                  src={product.image}
-                  alt={product.title || 'Product Image'}
-                  fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  className="rounded-md object-cover"
-                  priority
-                />
+      <div className="relative w-full mt-4">
+        <div className="flex justify-center">
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={currentIndex}
+              initial={{ opacity: 0, x: 100 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -100 }}
+              transition={{ duration: 0.3 }}
+              className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm w-[250px]"
+            >
+              {products[currentIndex].image && (
+                <div className="relative w-full aspect-video mb-3">
+                  <Image
+                    src={products[currentIndex].image}
+                    alt={products[currentIndex].title || 'Product Image'}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    className="rounded-md object-cover"
+                    priority
+                  />
+                </div>
+              )}
+              <div className="space-y-2">
+                {products[currentIndex].title && (
+                  <h3 className="font-medium text-gray-800">
+                    {products[currentIndex].title}
+                  </h3>
+                )}
+                {products[currentIndex].price && (
+                  <p className="text-lg font-semibold text-blue-600">
+                    {products[currentIndex].price}
+                  </p>
+                )}
+                {products[currentIndex].url && (
+                  <motion.a
+                    href={products[currentIndex].url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block bg-blue-500 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-600 transition-colors"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    View Product
+                  </motion.a>
+                )}
               </div>
-            )}
-            <div className="space-y-2">
-              {product.title && (
-                <h3 className="font-medium text-gray-800">{product.title}</h3>
-              )}
-              {product.price && (
-                <p className="text-lg font-semibold text-blue-600">{product.price}</p>
-              )}
-              {product.url && (
-                <a
-                  href={product.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block bg-blue-500 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-600 transition-colors"
-                >
-                  View Product
-                </a>
-              )}
-            </div>
-          </motion.div>
-        ))}
-      </motion.div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {/* Navigation buttons */}
+        {products.length > 1 && (
+          <>
+            <motion.button
+              className="absolute left-0 top-1/2 -translate-y-1/2 -ml-4 p-2 bg-white/80 rounded-full shadow-md hover:bg-white/90"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={previousProduct}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+              </svg>
+            </motion.button>
+            <motion.button
+              className="absolute right-0 top-1/2 -translate-y-1/2 -mr-4 p-2 bg-white/80 rounded-full shadow-md hover:bg-white/90"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={nextProduct}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+              </svg>
+            </motion.button>
+          </>
+        )}
+
+        {/* Pagination dots */}
+        {products.length > 1 && (
+          <div className="flex justify-center space-x-2 mt-4">
+            {products.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setProductIndices(prev => ({ ...prev, [messageIndex]: index }))}
+                className={`w-2 h-2 rounded-full transition-colors ${
+                  index === currentIndex ? 'bg-blue-500' : 'bg-gray-300'
+                }`}
+              />
+            ))}
+          </div>
+        )}
+      </div>
     );
   };
 
@@ -111,7 +193,7 @@ export const MessageList = memo(({ messages, isTyping }) => {
                 ) : (
                   <span>{msg.content || msg.text || ""}</span>
                 )}
-                {msg.displayChoice === 'yes' && renderProductCarousel(msg)}
+                {msg.displayChoice === 'yes' && renderProductCarousel(msg, index)}
               </>
             ) : (
               <span>{msg.content || msg.text || ""}</span>
@@ -120,13 +202,17 @@ export const MessageList = memo(({ messages, isTyping }) => {
         </div>
       </div>
     );
-  }, []);
+  }, [productIndices]);
 
   return (
     <div 
       ref={containerRef} 
-      className="h-full overflow-y-auto p-4 bg-white flex flex-col" 
+      className="h-full overflow-y-auto p-4 bg-white flex flex-col relative hide-scrollbar" 
       onScroll={handleScroll}
+      style={{
+        msOverflowStyle: 'none',  // IE and Edge
+        scrollbarWidth: 'none',   // Firefox
+      }}
     >
       <div className="flex-shrink-0 flex flex-col items-center mb-8">
         <Image src={logo} alt="Chat Logo" className="w-20 h-20 rounded-full object-cover" width={80} height={80} />
@@ -159,5 +245,24 @@ export const MessageList = memo(({ messages, isTyping }) => {
     </div>
   );
 });
+
+// Add this CSS at the top of your file or in your global CSS
+const styles = `
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .hide-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;     /* Firefox */
+  }
+`;
+
+// Add the styles to the document
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement("style");
+  styleSheet.innerText = styles;
+  document.head.appendChild(styleSheet);
+}
 
 MessageList.displayName = "MessageList";
