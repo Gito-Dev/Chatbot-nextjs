@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState, useCallback, memo } from "react";
 import Image from "next/image";
 import logo from "../../assets/logo.png";
 import { TypeAnimation } from "react-type-animation";
+import { motion } from "framer-motion";
 
 export const MessageList = memo(({ messages, isTyping }) => {
   const messagesEndRef = useRef(null);
@@ -19,6 +20,77 @@ export const MessageList = memo(({ messages, isTyping }) => {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages, isTyping, autoScroll]);
+
+  const renderProductCarousel = (msg) => {
+    // Create an array of all possible products
+    const productKeys = [
+      { title: 'product1Title', image: 'product1Image1', price: 'product1Price', url: 'product1Url' },
+      { title: 'product2Title', image: 'product2Image1', price: 'product2Price', url: 'product2Url' },
+      { title: 'product3Title', image: 'product3Image1', price: 'product3Price', url: 'product3Url' }
+    ];
+
+    // Filter and map only the products that exist in the message
+    const products = productKeys
+      .map(keys => ({
+        title: msg[keys.title],
+        image: msg[keys.image],
+        price: msg[keys.price],
+        url: msg[keys.url]
+      }))
+      .filter(product => product.title); // Only include products that have a title
+
+    if (products.length === 0) return null;
+
+    return (
+      <motion.div
+        className="flex overflow-x-auto space-x-4 mt-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        {products.map((product, index) => (
+          <motion.div
+            key={index}
+            className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm min-w-[250px]"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: index * 0.1 }}
+          >
+            {product.image && (
+              <div className="relative w-full aspect-video mb-3">
+                <Image
+                  src={product.image}
+                  alt={product.title || 'Product Image'}
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="rounded-md object-cover"
+                  priority
+                />
+              </div>
+            )}
+            <div className="space-y-2">
+              {product.title && (
+                <h3 className="font-medium text-gray-800">{product.title}</h3>
+              )}
+              {product.price && (
+                <p className="text-lg font-semibold text-blue-600">{product.price}</p>
+              )}
+              {product.url && (
+                <a
+                  href={product.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block bg-blue-500 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-600 transition-colors"
+                >
+                  View Product
+                </a>
+              )}
+            </div>
+          </motion.div>
+        ))}
+      </motion.div>
+    );
+  };
 
   const renderMessage = useCallback((msg, index) => {
     return (
@@ -39,44 +111,7 @@ export const MessageList = memo(({ messages, isTyping }) => {
                 ) : (
                   <span>{msg.content || msg.text || ""}</span>
                 )}
-                
-                {msg.hasOneProduct && (
-                  <div className="mt-4 bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                    {msg.product1Image1 && (
-                      <div className="relative w-full aspect-video mb-3">
-                        <Image 
-                          src={msg.product1Image1} 
-                          alt={msg.product1Title || 'Product Image'} 
-                          fill
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                          className="rounded-md object-cover"
-                          priority
-                        />
-                      </div>
-                    )}
-                    <div className="space-y-2">
-                      {msg.product1Title && (
-                        <h3 className="font-medium text-gray-800">{msg.product1Title}</h3>
-                      )}
-                      {msg.product1Description && (
-                        <p className="text-sm text-gray-600">{msg.product1Description}</p>
-                      )}
-                      {msg.product1Price && (
-                        <p className="text-lg font-semibold text-blue-600">{msg.product1Price}</p>
-                      )}
-                      {msg.product1Url && (
-                        <a 
-                          href={msg.product1Url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-block bg-blue-500 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-600 transition-colors"
-                        >
-                          View Product
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                )}
+                {msg.displayChoice === 'yes' && renderProductCarousel(msg)}
               </>
             ) : (
               <span>{msg.content || msg.text || ""}</span>

@@ -55,30 +55,45 @@ export async function POST(req) {
     // Prepare the response data
     const responseData = {
       message: messageContent,
-      displayChoice: false,
-      hasOneProduct: false,
-      hasTwoProducts: false,
-      hasThreeProducts: false,
+      displayChoice: productInfo?.display_choice || false,
+      hasOneProduct: !!data.product_1_title,
+      hasTwoProducts: !!data.product_2_title,
+      hasThreeProducts: !!data.product_3_title,
       // Product details - using exact property names from API response
       product1Title: data.product_1_title || '',
-      product1Description: data.product_1_description || '',
       product1Image1: data.product_1_image_1 || '',
       product1Price: data.product_1_price || '',
-      product1Url: data.product_1_url || ''
+      product1Url: data.product_1_url || '',
+      product2Title: data.product_2_title || '',
+      product2Image1: data.product_2_image_1 || '',
+      product2Price: data.product_2_price || '',
+      product2Url: data.product_2_url || '',
+      product3Title: data.product_3_title || '',
+      product3Image1: data.product_3_image_1 || '',
+      product3Price: data.product_3_price || '',
+      product3Url: data.product_3_url || ''
     };
-
-    // Set display flags if we have product data
-    if (data.product_1_title && data.product_1_image_1) {
-      responseData.displayChoice = true;
-      responseData.hasOneProduct = true;
-    }
 
     // Debug logs
     console.log('Product data from API:', {
-      title: data.product_1_title,
-      image: data.product_1_image_1,
-      price: data.product_1_price,
-      url: data.product_1_url
+      product1: {
+        title: data.product_1_title,
+        image: data.product_1_image_1,
+        price: data.product_1_price,
+        url: data.product_1_url
+      },
+      product2: {
+        title: data.product_2_title,
+        image: data.product_2_image_1,
+        price: data.product_2_price,
+        url: data.product_2_url
+      },
+      product3: {
+        title: data.product_3_title,
+        image: data.product_3_image_1,
+        price: data.product_3_price,
+        url: data.product_3_url
+      }
     });
     
     console.log('Final response data:', responseData);
