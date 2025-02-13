@@ -10,17 +10,35 @@ export const MessageList = memo(({ messages, isTyping }) => {
   const [autoScroll, setAutoScroll] = useState(true);
   const [productIndices, setProductIndices] = useState({});
 
-  const handleScroll = useCallback((e) => {
-    const element = e.target;
-    const threshold = 100;
-    setAutoScroll(element.scrollHeight - element.scrollTop - element.clientHeight < threshold);
-  }, []);
-
+  // Scroll to bottom on new messages
   useEffect(() => {
     if (autoScroll && messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+      messagesEndRef.current.scrollIntoView({ 
+        behavior: "instant", // Changed from "smooth" to "instant"
+        block: "end"
+      });
     }
   }, [messages, isTyping, autoScroll]);
+
+  // Handle scroll events
+  const handleScroll = useCallback((e) => {
+    const element = e.target;
+    const isAtBottom = Math.abs(
+      element.scrollHeight - element.scrollTop - element.clientHeight
+    ) < 50; // threshold of 50px
+    
+    setAutoScroll(isAtBottom);
+  }, []);
+
+  // Initial scroll to bottom when component mounts
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ 
+        behavior: "instant",
+        block: "end"
+      });
+    }
+  }, []);
 
   const renderProductCarousel = (msg, messageIndex) => {
     const products = [];
@@ -134,22 +152,22 @@ export const MessageList = memo(({ messages, isTyping }) => {
         {products.length > 1 && (
           <>
             <motion.button
-              className="absolute left-0 top-1/2 -translate-y-1/2 -ml-4 p-2 bg-white/80 rounded-full shadow-md hover:bg-white/90"
+              className="absolute left-0 top-1/2 -translate-y-1/2 -ml-12 p-1.5 bg-white/80 rounded-full shadow-md hover:bg-white/90"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={previousProduct}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
               </svg>
             </motion.button>
             <motion.button
-              className="absolute right-0 top-1/2 -translate-y-1/2 -mr-4 p-2 bg-white/80 rounded-full shadow-md hover:bg-white/90"
+              className="absolute right-0 top-1/2 -translate-y-1/2 -mr-12 p-1.5 bg-white/80 rounded-full shadow-md hover:bg-white/90"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={nextProduct}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
               </svg>
             </motion.button>
