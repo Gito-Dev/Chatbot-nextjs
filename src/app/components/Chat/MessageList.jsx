@@ -152,22 +152,22 @@ export const MessageList = memo(({ messages, isTyping }) => {
         {products.length > 1 && (
           <>
             <motion.button
-              className="absolute left-0 top-1/2 -translate-y-1/2 -ml-12 p-1.5 bg-white/80 rounded-full shadow-md hover:bg-white/90"
+              className="absolute left-0 top-[40%] -ml-12 p-1.5 bg-white/80 rounded-full shadow-md hover:bg-white/90"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={previousProduct}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
               </svg>
             </motion.button>
             <motion.button
-              className="absolute right-0 top-1/2 -translate-y-1/2 -mr-12 p-1.5 bg-white/80 rounded-full shadow-md hover:bg-white/90"
+              className="absolute right-0 top-[40%] -mr-12 p-1.5 bg-white/80 rounded-full shadow-md hover:bg-white/90"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={nextProduct}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
               </svg>
             </motion.button>
