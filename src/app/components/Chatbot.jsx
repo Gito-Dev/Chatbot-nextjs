@@ -53,11 +53,22 @@ export default function Chatbot() {
         {
           headers: {
             'Content-Type': 'application/json',
-          }
+          },
+          timeout: 70000, // Increased to 70 seconds
         }
       );
 
       if (response.data) {
+        // Show a loading message if it's taking longer than usual
+        if (response.data.error) {
+          setMessages(prev => [...prev, {
+            text: response.data.message,
+            sender: "bot",
+            isNew: false
+          }]);
+          return;
+        }
+
         const botMessage = {
           sender: "bot",
           content: response.data.message,
@@ -80,6 +91,7 @@ export default function Chatbot() {
         setIsTyping(false);
         setMessages(prev => [...prev, botMessage]);
 
+        // Remove isNew flag after animation
         setTimeout(() => {
           setMessages(prev => 
             prev.map(msg => 
@@ -88,12 +100,16 @@ export default function Chatbot() {
           );
         }, 1000);
       }
-
     } catch (error) {
-      console.error("API Error Details:", error);
       setIsTyping(false);
+      let errorMessage = "Please try again in a moment. The server might need a minute to wake up.";
+      
+      if (error.response?.status === 504) {
+        errorMessage = "The service is taking longer than expected. Please try again in a moment.";
+      }
+      
       setMessages(prev => [...prev, {
-        text: "I apologize, but I encountered an error. Please try again.",
+        text: errorMessage,
         sender: "bot",
         isNew: false
       }]);
