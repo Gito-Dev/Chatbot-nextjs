@@ -63,14 +63,21 @@ export default function Chatbot() {
           content: response.data.message,
           isNew: true,
           displayChoice: response.data.displayChoice,
-          hasOneProduct: response.data.hasOneProduct,
-          hasTwoProducts: response.data.hasTwoProducts,
-          hasThreeProducts: response.data.hasThreeProducts,
           product1Title: response.data.product1Title,
           product1Image1: response.data.product1Image1,
           product1Price: response.data.product1Price,
-          product1Url: response.data.product1Url
+          product1Url: response.data.product1Url,
+          product2Title: response.data.product2Title,
+          product2Image1: response.data.product2Image1,
+          product2Price: response.data.product2Price,
+          product2Url: response.data.product2Url,
+          product3Title: response.data.product3Title,
+          product3Image1: response.data.product3Image1,
+          product3Price: response.data.product3Price,
+          product3Url: response.data.product3Url
         };
+
+        console.log('Bot message with products:', botMessage); // Debug log
 
         setIsTyping(false);
         setMessages(prev => [...prev, botMessage]);

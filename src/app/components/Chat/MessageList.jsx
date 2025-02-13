@@ -3,11 +3,25 @@ import Image from "next/image";
 import logo from "../../assets/logo.png";
 import { TypeAnimation } from "react-type-animation";
 import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 export const MessageList = memo(({ messages, isTyping }) => {
   const messagesEndRef = useRef(null);
   const containerRef = useRef(null);
   const [autoScroll, setAutoScroll] = useState(true);
+  const [productIndices, setProductIndices] = useState({});
+
+  // Scroll to bottom on new messages
+  useEffect(() => {
+    if (autoScroll && messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ 
+        behavior: "instant", // Changed from "smooth" to "instant"
+        block: "end"
+      });
+    }
+  }, [messages, isTyping, autoScroll]);
+
+  // Handle scroll events
   const [productIndices, setProductIndices] = useState({});
 
   // Scroll to bottom on new messages
@@ -28,8 +42,14 @@ export const MessageList = memo(({ messages, isTyping }) => {
     ) < 50; // threshold of 50px
     
     setAutoScroll(isAtBottom);
+    const isAtBottom = Math.abs(
+      element.scrollHeight - element.scrollTop - element.clientHeight
+    ) < 50; // threshold of 50px
+    
+    setAutoScroll(isAtBottom);
   }, []);
 
+  // Initial scroll to bottom when component mounts
   // Initial scroll to bottom when component mounts
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -212,6 +232,7 @@ export const MessageList = memo(({ messages, isTyping }) => {
                   <span>{msg.content || msg.text || ""}</span>
                 )}
                 {msg.displayChoice === 'yes' && renderProductCarousel(msg, index)}
+                {msg.displayChoice === 'yes' && renderProductCarousel(msg, index)}
               </>
             ) : (
               <span>{msg.content || msg.text || ""}</span>
@@ -221,12 +242,18 @@ export const MessageList = memo(({ messages, isTyping }) => {
       </div>
     );
   }, [productIndices]);
+  }, [productIndices]);
 
   return (
     <div 
       ref={containerRef} 
       className="h-full overflow-y-auto p-4 bg-white flex flex-col relative hide-scrollbar" 
+      className="h-full overflow-y-auto p-4 bg-white flex flex-col relative hide-scrollbar" 
       onScroll={handleScroll}
+      style={{
+        msOverflowStyle: 'none',  // IE and Edge
+        scrollbarWidth: 'none',   // Firefox
+      }}
       style={{
         msOverflowStyle: 'none',  // IE and Edge
         scrollbarWidth: 'none',   // Firefox
@@ -263,6 +290,25 @@ export const MessageList = memo(({ messages, isTyping }) => {
     </div>
   );
 });
+
+// Add this CSS at the top of your file or in your global CSS
+const styles = `
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .hide-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;     /* Firefox */
+  }
+`;
+
+// Add the styles to the document
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement("style");
+  styleSheet.innerText = styles;
+  document.head.appendChild(styleSheet);
+}
 
 // Add this CSS at the top of your file or in your global CSS
 const styles = `
