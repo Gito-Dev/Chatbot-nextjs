@@ -77,12 +77,9 @@ export default function Chatbot() {
           product3Url: response.data.product3Url
         };
 
-        console.log('Bot message with products:', botMessage); // Debug log
-
         setIsTyping(false);
         setMessages(prev => [...prev, botMessage]);
 
-        // Remove isNew flag after animation
         setTimeout(() => {
           setMessages(prev => 
             prev.map(msg => 

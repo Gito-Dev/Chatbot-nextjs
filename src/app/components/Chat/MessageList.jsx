@@ -73,27 +73,17 @@ export const MessageList = memo(({ messages, isTyping }) => {
     const currentIndex = productIndices[messageIndex] || 0;
 
     const nextProduct = () => {
-      console.log('Next clicked, current index:', currentIndex); // Debug log
-      setProductIndices(prev => {
-        const newIndex = (currentIndex + 1) % products.length;
-        console.log('Setting new index:', newIndex); // Debug log
-        return {
-          ...prev,
-          [messageIndex]: newIndex
-        };
-      });
+      setProductIndices(prev => ({
+        ...prev,
+        [messageIndex]: (currentIndex + 1) % products.length
+      }));
     };
 
     const previousProduct = () => {
-      console.log('Previous clicked, current index:', currentIndex); // Debug log
-      setProductIndices(prev => {
-        const newIndex = currentIndex === 0 ? products.length - 1 : currentIndex - 1;
-        console.log('Setting new index:', newIndex); // Debug log
-        return {
-          ...prev,
-          [messageIndex]: newIndex
-        };
-      });
+      setProductIndices(prev => ({
+        ...prev,
+        [messageIndex]: currentIndex === 0 ? products.length - 1 : currentIndex - 1
+      }));
     };
 
     return (

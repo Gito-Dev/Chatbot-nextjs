@@ -16,6 +16,9 @@ const nextConfig = {
     ],
   },
   // ... any other existing config
+  optimizeFonts: {
+    preload: false
+  }
 }
 
 module.exports = nextConfig 
